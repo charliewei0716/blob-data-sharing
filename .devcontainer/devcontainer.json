@@ -1,0 +1,38 @@
+{
+    "name": "Azure Functions (Python 3)",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "args": {
+            "VARIANT": "3.10-bullseye"
+        }
+    },
+    "features": {
+        "ghcr.io/azure/azure-dev/azd:latest": {},
+        "ghcr.io/devcontainers/features/azure-cli:1": {
+          "version": "latest",
+          "installBicep": true
+        },
+        "ghcr.io/devcontainers/features/node:1": {
+            "version": "18",
+            "nodeGypDependencies": false
+        }
+    },
+    "forwardPorts": [
+        7071
+    ],
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "ms-vscode.azurecli",
+                "ms-azuretools.vscode-bicep",
+                "ms-azuretools.vscode-azurefunctions",
+                "azurite.azurite"
+            ]
+        } 
+    },
+    "postCreateCommand": "python3 -m venv .venv",
+    "postAttachCommand": ". .venv/bin/activate",
+    "remoteUser": "vscode"
+}
