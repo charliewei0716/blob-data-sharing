@@ -1,1 +1,1 @@
-# azure-function-python-codespaces-sample
+# Blob Data Sharing with Azure Functions Flex Consumption
