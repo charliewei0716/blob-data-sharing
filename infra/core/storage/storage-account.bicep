@@ -1,9 +1,8 @@
-param storageAccountName string
 param location string = resourceGroup().location
 param tags object = {}
-param functionContainerName string
+param storageAccountName string
+param containerNames array
 param integrationSubnetId string
-
 
 resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   name: storageAccountName
@@ -37,9 +36,11 @@ resource storageAccount 'Microsoft.Storage/storageAccounts@2022-05-01' = {
   resource blobService 'blobServices' existing = {
     name: 'default'
 
-    resource container 'containers' = {
-      name: functionContainerName
-    }
+    resource container 'containers' = [
+      for containerName in containerNames:{
+        name: containerName
+      }
+    ]
   }
 }
 

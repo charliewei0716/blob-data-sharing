@@ -1,23 +1,27 @@
-import logging
+import os
 import json
+import logging
 from datetime import datetime, timedelta, timezone
 import azure.functions as func
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient, generate_blob_sas, BlobSasPermissions
 
+source_account_name = os.getenv("SOURCE_STORAGE_ACCOUNT_NAME")
 source_blob_service_client = BlobServiceClient(  
-    account_url="https://cmpadls.blob.core.windows.net/",  
+    account_url=f'https://{source_account_name}.blob.core.windows.net/',
     credential=DefaultAzureCredential()
 )
 
-destination_blob_service_client = BlobServiceClient.from_connection_string(
-    ""
+target_account_name = os.getenv("TARGET_STORAGE_ACCOUNT_NAME")
+target_blob_service_client = BlobServiceClient.from_connection_string(
+    account_url=f'https://{target_account_name}.blob.core.windows.net/',
+    credential=DefaultAzureCredential()
 )
 
 app = func.FunctionApp()
 
-@app.function_name(name="blob_copy")
-@app.event_grid_trigger(arg_name="event")
+@app.function_name(name='blob_copy')
+@app.event_grid_trigger(arg_name='event')
 def main(event: func.EventGridEvent):
     result = json.dumps({
         'id': event.id,
@@ -27,13 +31,11 @@ def main(event: func.EventGridEvent):
         'event_type': event.event_type,
     })
 
-    logging.info(f"Python EventGrid trigger processed an event: {result}")
+    logging.info(f'Python EventGrid trigger processed an event: {result}')
 
     current_time = datetime.now(timezone.utc)
 
     blob_name = event.subject.split("/blobs/")[1]
-
-    source_container_name = event.subject.split("/")[4]
 
     user_delegation_key = source_blob_service_client.get_user_delegation_key(  
         key_start_time=current_time,
@@ -41,20 +43,19 @@ def main(event: func.EventGridEvent):
     )
 
     sas_token = generate_blob_sas(
-        account_name="cmpadls",
-        container_name=source_container_name,
+        account_name=source_account_name,
+        container_name='source',
         blob_name=blob_name,
         user_delegation_key=user_delegation_key,
         permission=BlobSasPermissions(read=True),
         expiry=current_time + timedelta(hours=1)
     )
 
-    destination_blob_client = destination_blob_service_client.get_blob_client(
-        container='test2', blob=blob_name
-    )
+    target_blob_client = target_blob_service_client.get_blob_client(container='target', blob=blob_name)
 
-    copy_operation = destination_blob_client.start_copy_from_url(
-        event.get_json()['url']+ "?" + sas_token
+    copy_operation = target_blob_client.start_copy_from_url(
+        source_url = event.get_json()['url']+ "?" + sas_token,
+        requires_sync=False
     )
 
     

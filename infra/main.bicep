@@ -29,17 +29,32 @@ module vnet 'core/networking/vnet.bicep' = {
   }
 }
 
-module storage 'core/storage/storage-account.bicep' = {
-  name: 'storage'
-  scope: resourceGroups
-  params: {
-    location: location
-    tags: tags
-    storageAccountName: '${abbrs.storageStorageAccounts}${resourceToken}'
-    functionContainerName: functionContainerName
-    integrationSubnetId: vnet.outputs.integrationSubnetId
+var storages = [
+  {
+    name: 'sourceStorage'
+    storageAccountName: '${abbrs.storageStorageAccounts}source${resourceToken}'
+    containerNames: [functionContainerName, 'source']
   }
-}
+  {
+    name: 'targetStorage'
+    storageAccountName: '${abbrs.storageStorageAccounts}target${resourceToken}'
+    containerNames: ['target']
+  }
+]
+
+module storage 'core/storage/storage-account.bicep' = [
+  for storage in  storages:{
+    name: storage.name
+    scope: resourceGroups
+    params: {
+      location: location
+      tags: tags
+      storageAccountName: storage.storageAccountName
+      containerNames: storage.containerNames
+      integrationSubnetId: vnet.outputs.integrationSubnetId
+    }
+  }
+]
 
 module flexFunction 'core/host/function.bicep' = {
   name: 'functionapp'
@@ -47,10 +62,14 @@ module flexFunction 'core/host/function.bicep' = {
   params: {
     location: location
     tags: tags
-    storageAccountName: storage.outputs.storageAccountName
+    sourceStorageAccountName: storage[0].outputs.storageAccountName
+    targetStorageAccountName: storage[1].outputs.storageAccountName
     FunctionPlanName: '${abbrs.webServerFarms}${resourceToken}'
     functionAppName: functionAppName
     functionContainerName: functionContainerName
     integrationSubnetId: vnet.outputs.integrationSubnetId
   }
 }
+
+output SOURCE_STORAGE_ACCOUNT_NAME string = storage[0].outputs.storageAccountName
+output TARGET_STORAGE_ACCOUNT_NAME string = storage[1].outputs.storageAccountName
