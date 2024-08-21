@@ -19,6 +19,16 @@ resource resourceGroups 'Microsoft.Resources/resourceGroups@2022-09-01' = {
   name: '${abbrs.resourcesResourceGroups}${environmentName}'
 }
 
+module userAssignedIdentity './core/identity/user-assigned-identity.bicep' = {
+  name: 'UserAssignedIdentity'
+  scope: resourceGroups
+  params: {
+    location: location
+    tags: tags
+    identityName: '${abbrs.managedIdentityUserAssignedIdentities}${resourceToken}'
+  }
+}
+
 module vnet 'core/networking/vnet.bicep' = {
   name: 'vnet'
   scope: resourceGroups
@@ -66,8 +76,23 @@ module flexFunction 'core/host/function.bicep' = {
     targetStorageAccountName: storage[1].outputs.storageAccountName
     FunctionPlanName: '${abbrs.webServerFarms}${resourceToken}'
     functionAppName: functionAppName
+    identityId: userAssignedIdentity.outputs.identityId
+    identityClientId: userAssignedIdentity.outputs.identityClientId
+    principalID: userAssignedIdentity.outputs.identityPrincipalId
     functionContainerName: functionContainerName
     integrationSubnetId: vnet.outputs.integrationSubnetId
+  }
+}
+
+module eventgrid 'core/integration/eventgrid.bicep' = {
+  name: 'eventgrid'
+  scope: resourceGroups
+  params: {
+    location: location
+    tags: tags
+    storageAccountName: storage[0].outputs.storageAccountName
+    systemTopicName: '${abbrs.eventGridDomainsTopics}${resourceToken}'
+    functionAppName: functionAppName
   }
 }
 

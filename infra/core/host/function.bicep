@@ -4,6 +4,9 @@ param sourceStorageAccountName string
 param targetStorageAccountName string
 param FunctionPlanName string
 param functionAppName string
+param identityId string
+param identityClientId string
+param principalID string
 param functionContainerName string
 param integrationSubnetId string
 
@@ -32,10 +35,13 @@ resource flexFunctionPlan 'Microsoft.Web/serverfarms@2023-12-01' = {
 resource flexFunctionApp 'Microsoft.Web/sites@2023-12-01' = {
   name: functionAppName
   location: location
-  tags: tags
+  tags: union(tags, { 'azd-service-name': 'blob-sharing-func' })
   kind: 'functionapp,linux'
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities: { 
+      '${identityId}': {}
+    }
   }
   properties: {
     serverFarmId: flexFunctionPlan.id
@@ -47,7 +53,8 @@ resource flexFunctionApp 'Microsoft.Web/sites@2023-12-01' = {
           type: 'blobContainer'
           value: '${sourceStorageAccount.properties.primaryEndpoints.blob}${functionContainerName}'
           authentication: {
-            type: 'SystemAssignedIdentity'
+            type: 'UserAssignedIdentity'
+            userAssignedIdentityResourceId: identityId
           }
         }
       }
@@ -66,6 +73,7 @@ resource flexFunctionApp 'Microsoft.Web/sites@2023-12-01' = {
     name: 'appsettings'
     properties: {
       AzureWebJobsStorage__accountName: sourceStorageAccount.name
+      AzureWebJobsStorage__clientId: identityClientId
       AzureWebJobsStorage__credential : 'managedidentity'
       SOURCE_STORAGE_ACCOUNT_NAME: sourceStorageAccount.name
       TARGET_STORAGE_ACCOUNT_NAME: targetStorageAccount.name
@@ -74,21 +82,23 @@ resource flexFunctionApp 'Microsoft.Web/sites@2023-12-01' = {
 }
 
 resource sourceStorageRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
-  name: guid(sourceStorageAccount.id, flexFunctionApp.id, 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b')
+  name: guid(sourceStorageAccount.id, principalID, 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b')
   scope: sourceStorageAccount
   properties: {
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b')
-    principalId: flexFunctionApp.identity.principalId
+    principalId: principalID
     principalType: 'ServicePrincipal'
   }
 }
 
 resource targetStorageRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
-  name: guid(targetStorageAccount.id, flexFunctionApp.id, 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b')
+  name: guid(targetStorageAccount.id, principalID, 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b')
   scope: targetStorageAccount
   properties: {
     roleDefinitionId: resourceId('Microsoft.Authorization/roleDefinitions', 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b')
-    principalId: flexFunctionApp.identity.principalId
+    principalId: principalID
     principalType: 'ServicePrincipal'
   }
 }
+
+//output key object = listkeys(concat(resourceId('Microsoft.Web/sites', flexFunctionApp), '/host/default/'),'2021-02-01').

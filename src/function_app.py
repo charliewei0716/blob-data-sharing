@@ -13,14 +13,14 @@ source_blob_service_client = BlobServiceClient(
 )
 
 target_account_name = os.getenv("TARGET_STORAGE_ACCOUNT_NAME")
-target_blob_service_client = BlobServiceClient.from_connection_string(
+target_blob_service_client = BlobServiceClient(
     account_url=f'https://{target_account_name}.blob.core.windows.net/',
     credential=DefaultAzureCredential()
 )
 
 app = func.FunctionApp()
 
-@app.function_name(name='blob_copy')
+@app.function_name(name='blob_sharing')
 @app.event_grid_trigger(arg_name='event')
 def main(event: func.EventGridEvent):
     result = json.dumps({
