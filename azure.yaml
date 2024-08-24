@@ -6,3 +6,10 @@ services:
     project: ./src
     language: python
     host: function
+hooks:
+  postup:
+    posix:
+      shell: sh
+      run: ./scripts/postprovision.sh
+      interactive: true
+      continueOnError: false

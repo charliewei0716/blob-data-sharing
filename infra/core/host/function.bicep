@@ -69,18 +69,37 @@ resource flexFunctionApp 'Microsoft.Web/sites@2023-12-01' = {
     }
   }
 
+  resource webConfig 'config' = {
+    name: 'web'
+    properties: {
+      publicNetworkAccess: 'Enabled'
+      ipSecurityRestrictionsDefaultAction: 'Deny'
+      ipSecurityRestrictions:[
+        {
+          ipAddress: 'AzureEventGrid'
+          action: 'Allow'
+          tag: 'ServiceTag'
+          priority: 300
+          name: 'Allow Azure Event Grid'
+        }
+      ]
+    }
+  }
+
   resource appSettings 'config' = {
     name: 'appsettings'
     properties: {
       AzureWebJobsStorage__accountName: sourceStorageAccount.name
       AzureWebJobsStorage__clientId: identityClientId
       AzureWebJobsStorage__credential : 'managedidentity'
+      AZURE_CLIENT_ID: identityClientId
       SOURCE_STORAGE_ACCOUNT_NAME: sourceStorageAccount.name
       TARGET_STORAGE_ACCOUNT_NAME: targetStorageAccount.name
     }
   }
 }
 
+// Storage Blob Data Owner
 resource sourceStorageRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
   name: guid(sourceStorageAccount.id, principalID, 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b')
   scope: sourceStorageAccount
@@ -91,6 +110,7 @@ resource sourceStorageRoleAssignment 'Microsoft.Authorization/roleAssignments@20
   }
 }
 
+// Storage Blob Data Owner
 resource targetStorageRoleAssignment 'Microsoft.Authorization/roleAssignments@2020-04-01-preview' = {
   name: guid(targetStorageAccount.id, principalID, 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b')
   scope: targetStorageAccount
@@ -100,5 +120,3 @@ resource targetStorageRoleAssignment 'Microsoft.Authorization/roleAssignments@20
     principalType: 'ServicePrincipal'
   }
 }
-
-//output key object = listkeys(concat(resourceId('Microsoft.Web/sites', flexFunctionApp), '/host/default/'),'2021-02-01').

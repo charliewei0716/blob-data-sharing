@@ -13,15 +13,15 @@ var functionContainerName = 'app-package-${functionAppName}'
 var tags = { 'azd-env-name': environmentName }
 
 
-resource resourceGroups 'Microsoft.Resources/resourceGroups@2022-09-01' = {
+resource resourceGroup 'Microsoft.Resources/resourceGroups@2022-09-01' = {
   location: location
   tags: tags
   name: '${abbrs.resourcesResourceGroups}${environmentName}'
 }
 
-module userAssignedIdentity './core/identity/user-assigned-identity.bicep' = {
+module userAssignedIdentity 'core/identity/user-assigned-identity.bicep' = {
   name: 'UserAssignedIdentity'
-  scope: resourceGroups
+  scope: resourceGroup
   params: {
     location: location
     tags: tags
@@ -31,7 +31,7 @@ module userAssignedIdentity './core/identity/user-assigned-identity.bicep' = {
 
 module vnet 'core/networking/vnet.bicep' = {
   name: 'vnet'
-  scope: resourceGroups
+  scope: resourceGroup
   params: {
     location: location
     tags: tags
@@ -55,7 +55,7 @@ var storages = [
 module storage 'core/storage/storage-account.bicep' = [
   for storage in  storages:{
     name: storage.name
-    scope: resourceGroups
+    scope: resourceGroup
     params: {
       location: location
       tags: tags
@@ -68,7 +68,7 @@ module storage 'core/storage/storage-account.bicep' = [
 
 module flexFunction 'core/host/function.bicep' = {
   name: 'functionapp'
-  scope: resourceGroups
+  scope: resourceGroup
   params: {
     location: location
     tags: tags
@@ -86,15 +86,18 @@ module flexFunction 'core/host/function.bicep' = {
 
 module eventgrid 'core/integration/eventgrid.bicep' = {
   name: 'eventgrid'
-  scope: resourceGroups
+  scope: resourceGroup
   params: {
     location: location
     tags: tags
     storageAccountName: storage[0].outputs.storageAccountName
     systemTopicName: '${abbrs.eventGridDomainsTopics}${resourceToken}'
-    functionAppName: functionAppName
   }
 }
 
 output SOURCE_STORAGE_ACCOUNT_NAME string = storage[0].outputs.storageAccountName
 output TARGET_STORAGE_ACCOUNT_NAME string = storage[1].outputs.storageAccountName
+
+output RESOURCE_GROUP_NAME string = resourceGroup.name
+output SYSTEM_TOPIC_NAME string = eventgrid.outputs.systemTopicName
+output FUNCTION_APP_NAME string = functionAppName

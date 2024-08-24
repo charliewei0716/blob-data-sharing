@@ -53,9 +53,7 @@ def main(event: func.EventGridEvent):
 
     target_blob_client = target_blob_service_client.get_blob_client(container='target', blob=blob_name)
 
-    copy_operation = target_blob_client.start_copy_from_url(
+    target_blob_client.start_copy_from_url(
         source_url = event.get_json()['url']+ "?" + sas_token,
         requires_sync=False
     )
-
-    
