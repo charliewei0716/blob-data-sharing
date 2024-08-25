@@ -67,7 +67,7 @@ Execute the following command to remove all resources. This will ensure you do n
 azd down
 ```
 
-## Resources
+## Reference
 
 Here are some resources to learn more about the technologies used in this repository:
 
