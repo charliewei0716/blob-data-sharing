@@ -45,3 +45,9 @@ Construct a high-performance, low-latency data sharing solution between differen
    - This process involves using `./scripts/postdeploy.sh` to set up a webhook for an Azure Function.
   
    ![Deploy](assets/deploy.png)
+
+## Testing in Azure Portal
+
+<div align="center">
+    <img src="./assets/testing-azure-portal.gif" alt="testing-azure-portal" width="1000px" align="center"/>
+</div>
