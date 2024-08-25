@@ -42,3 +42,4 @@ Construct a high-performance, low-latency data sharing solution between differen
    ```
    
    - Enter the environment name, Azure Subscription, and the location of the Azure resources one by one as instructed.
+   - This process involves using `./scripts/postdeploy.sh` to set up a webhook for an Azure Function.
