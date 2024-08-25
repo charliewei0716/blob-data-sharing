@@ -24,7 +24,8 @@ Construct a high-performance, low-latency data sharing solution between differen
 1. This repository has been optimized for GitHub codespaces. Please use the following badge to open a web-based version of VS Code in your browser.
 
     [![Open in GitHub Codespaces](https://img.shields.io/static/v1?style=for-the-badge&label=GitHub+Codespaces&message=Open&color=blue&logo=github)](https://codespaces.new/charliewei0716/blob-data-sharing?quickstart=1)
-2. Login to your Azure account with device authorization grant flow.
+   
+3. Login to your Azure account with device authorization grant flow.
    
    ```
    azd auth login --use-device-code
@@ -51,9 +52,11 @@ Construct a high-performance, low-latency data sharing solution between differen
 Follow these steps to conduct end-to-end testing on the Azure Portal.
 
 1. In the Azure Portal, locate the resource group named `rg-<your-environment-name>` and the two storage accounts named `stsource<hash-string>` and `sttarget<hash-string>` respectively.
+   
 2. Modify the above storage account settings.
    - If you are not located within the VNet, you must check **Add your client IP address** in the firewall settings.
    - Assign yourself the **Blob Data Contributor** role at the resource group or storage account level.
+    
 3. Refer to the animation example below. By uploading a file into the container named `source`, you will be able to see the file in the container named `target` within a few seconds.
 
 <div align="center">
