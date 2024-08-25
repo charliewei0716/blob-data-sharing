@@ -48,6 +48,10 @@ Construct a high-performance, low-latency data sharing solution between differen
 
 ## Testing in Azure Portal
 
+Follow these steps to conduct end-to-end testing on the Azure Portal.
+
+1. 
+
 <div align="center">
-    <img src="./assets/testing-azure-portal.gif" alt="testing-azure-portal" width="1000px" align="center"/>
+    <img src="./assets/testing-azure-portal.gif" alt="testing-azure-portal" style="width: 100%"/>
 </div>
