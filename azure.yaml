@@ -7,9 +7,9 @@ services:
     language: python
     host: function
 hooks:
-  postup:
+  postdeploy:
     posix:
       shell: sh
-      run: ./scripts/postup.sh
+      run: ./scripts/postdeploy.sh
       interactive: true
       continueOnError: false
