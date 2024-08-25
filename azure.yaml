@@ -10,6 +10,6 @@ hooks:
   postup:
     posix:
       shell: sh
-      run: ./scripts/postprovision.sh
+      run: ./scripts/postup.sh
       interactive: true
       continueOnError: false
