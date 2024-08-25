@@ -6,4 +6,6 @@
 
 Construct a high-performance, low-latency data sharing solution between different Azure Storage Accounts using Azure Functions Flex Consumption and the Copy Blob API.
 
+<img src="./assets/blob-data-sharing.png" alt="blob-data-sharing" width="640px" />
+
 </div>
