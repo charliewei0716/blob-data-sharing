@@ -17,8 +17,6 @@ Construct a high-performance, low-latency data sharing solution between differen
 - The key functionality is realized through the server-to-server [Blob Copy API](https://learn.microsoft.com/en-us/rest/api/storageservices/copy-blob?tabs=microsoft-entra-id), which offers the advantages of being highly efficient, exceptionally reliable, and low-code maintenance.
 - Using [the Python SDK to operate the Blob Copy API](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-blob-copy-python) and implementing the [authentication required](https://learn.microsoft.com/en-us/rest/api/storageservices/copy-blob?tabs=microsoft-entra-id#authorization) for cross storage account scenarios.
 
-### Architecture Diagram
-
 ## Getting Started
 
 1. This repository has been optimized for GitHub codespaces. Please use the following badge to open a web-based version of VS Code in your browser.
